@@ -1,14 +1,20 @@
-import './assets/main.css'
+import './assets/main.css';
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 
-import App from './App.vue'
-import router from './router'
+import App from './App.vue';
+import router from './router';
+import './assets/main.css';
 
-const app = createApp(App)
+import axios from 'axios';
 
-app.use(createPinia())
-app.use(router)
+axios.defaults.baseURL = 'http://todo_backend.test/api';
+axios.defaults.withCredentials = true;
 
-app.mount('#app')
+const app = createApp(App);
+
+app.use(createPinia());
+app.use(router);
+
+app.mount('#app');
