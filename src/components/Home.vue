@@ -44,12 +44,12 @@
                 <div class="flex items-center gap-3">
                   <input
                     type="checkbox"
-                    :checked="todo.completed"
+                    :checked="todo.is_completed"
                     @change="toggleTodo(todo)"
                     class="h-5 w-5"
                   />
                   <span
-                    :class="{ 'line-through text-gray-500': todo.completed }"
+                    :class="{ 'line-through text-gray-500': todo.is_completed }"
                     class="text-lg"
                   >
                     {{ todo.title }}
@@ -75,12 +75,12 @@
   <script>
   import { ref } from 'vue';
   import { useRouter } from 'vue-router';
-  import { VueDraggableNext } from 'vue-draggable-next';
+  import Draggable from 'vuedraggable';
   import api from '../api';
   
   export default {
     components: {
-      draggable: VueDraggableNext,
+      draggable: Draggable,
     },
     setup() {
       const todos = ref([]);
@@ -102,10 +102,15 @@
         if (!newTodo.value.trim()) return;
         loading.value = true;
         try {
-          const response = await api.post('/api/todos', {
+          const response = await api.post('/api/todos/create', {
             title: newTodo.value,
           });
-          todos.value.push(response.data);
+          todos.value.push({
+            id: response.data.todo.id,
+            title: response.data.todo.title,
+            is_completed: response.data.todo.is_completed || false,
+            order: response.data.todo.order || todos.value.length,
+          });
           newTodo.value = '';
         } catch (err) {
           error.value = 'Failed to add todo';
@@ -116,10 +121,10 @@
 
       const toggleTodo = async (todo) => {
         try {
-          const response = await api.put(`/api/todos/${todo.id}`, {
-            completed: !todo.completed,
+          const response = await api.put(`/api/todos/update/${todo.id}`, {
+            is_completed: !todo.is_completed,
           });
-          todo.completed = response.data.completed;
+          todo.is_completed = response.data.todo.is_completed;
         } catch (err) {
           error.value = 'Failed to update todo';
         }
@@ -127,7 +132,7 @@
 
       const deleteTodo = async (id) => {
         try {
-          await api.delete(`/api/todos/${id}`);
+          await api.delete(`/api/todos/delete/${id}`);
           todos.value = todos.value.filter((todo) => todo.id !== id);
         } catch (err) {
           error.value = 'Failed to delete todo';
@@ -136,9 +141,14 @@
 
       const reorderTodos = async () => {
         try {
-          const order = todos.value.map((todo) => todo.id);
-          await api.put('/api/todos/reorder', { order });
+          const todosPayload = todos.value.map((todo, index) => ({
+            id: todo.id,
+            order: index
+          }));
+          
+          await api.post('api/todos/reorder', { todos: todosPayload });
         } catch (err) {
+          console.error('Reorder Todos Error:', err);
           error.value = 'Failed to reorder todos';
           fetchTodos();
         }
