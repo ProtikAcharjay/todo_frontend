@@ -21,6 +21,7 @@
               required
             />
           </div>
+          <p v-if="error" class="mt-4 mb-2 text-red-500 text-center">{{ error }}</p>
           <button
             type="submit"
             class="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
@@ -35,7 +36,6 @@
             >Register</router-link
           >
         </p>
-        <p v-if="error" class="mt-4 text-red-500 text-center">{{ error }}</p>
       </div>
     </div>
   </template>

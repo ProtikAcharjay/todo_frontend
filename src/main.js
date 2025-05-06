@@ -7,12 +7,8 @@ import App from './App.vue';
 import router from './router';
 import './assets/main.css';
 
-import axios from 'axios';
 import draggable from 'vuedraggable';
 
-
-axios.defaults.baseURL = 'http://todo_backend.test/api';
-axios.defaults.withCredentials = true;
 
 const app = createApp(App);
 
